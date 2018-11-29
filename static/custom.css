@@ -1,0 +1,13 @@
+#pycmdOutput {
+  background : black;
+  color      : green;
+  min-height : 50vh;
+}
+
+.command-output {
+  color : lightgray;
+}
+
+.command-error {
+  color : red;
+}
