@@ -12,7 +12,7 @@ Installation:
 
 Create a virtual environment and install dependencies:
 
-  pip install -U -r requeriments.txt
+  pip install -U -r requirements.txt
 
 
 Run:
