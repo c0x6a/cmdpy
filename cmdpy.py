@@ -1,12 +1,12 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 import subprocess
 
-from flask import Flask, jsonify, render_template, request, send_from_directory
+from flask import Flask, jsonify, render_template, request
 
 ALLOWED_COMMANDS = ("ls", "echo", "cat", "dir", "man",)
 
-app = Flask(__name__, static_url_path="")
+app = Flask(__name__)
 
 
 def validate_command(command):
@@ -19,31 +19,27 @@ def validate_command(command):
     if command not in ALLOWED_COMMANDS:
         raise Exception(f"You're not allowed to use: {command}")
 
-
 @app.route("/")
 def root():
     return render_template("index.html")
 
-
-@app.route("/static/<path:path>")
-def send_statics(path):
-    return send_from_directory("static", path)
-
-
-@app.route("/api/commands/")
+@app.route("/api/commands")
 def available_commands():
     return jsonify(
         commands=ALLOWED_COMMANDS
     )
 
-
-@app.route("/api/cmd/")
+@app.route("/api/cmd", methods=["POST"])
 def custom_command():
-    raw_command = request.args.get("cmd")
-    command = raw_command.split()  # example: "ls -oh" will be ["ls", "-oh"]
+    body = request.get_json()
+    raw_command = body["cmd"]
+
+    command = raw_command.split() 
+    # example: "ls -oh" will be ["ls", "-oh"]
+
     try:
         validate_command(command[0])
-        result = subprocess.run(command, capture_output=True)
+        result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         return jsonify(
             command=raw_command,
             result=result.stdout.decode(),
@@ -52,7 +48,7 @@ def custom_command():
         return jsonify(
             command=raw_command,
             result=str(ex),
-        ), 400
+        ), 403
 
 
 if __name__ == "__main__":
